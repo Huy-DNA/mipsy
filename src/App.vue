@@ -8,7 +8,7 @@ import SidePane from './components/SidePane.vue';
 
 <template>
   <div class="min-h-[100vh]">
-    <header>
+    <header class="min-h-[5vh]">
       <div class="flex items-center bg-blue-100">
         <img alt="Mipsy logo" src="./assets/logo-no-bg.png" width="50" height="50" />
         ipsy
