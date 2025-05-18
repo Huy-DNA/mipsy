@@ -201,5 +201,6 @@ export function lex(source: string): Result<Token[], Error[]> {
     }
   }
 
+  result.push({ type: TokenType.EOF, start: { ...current }, end: { ...current } });
   return { result, errors };
 }
