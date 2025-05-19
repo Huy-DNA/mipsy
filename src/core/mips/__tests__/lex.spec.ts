@@ -133,7 +133,7 @@ describe('MIPS Lexer', () => {
     it('should tokenize comments', () => {
       const result = lex('# This is a comment\n');
       expect(result.errors).toHaveLength(0);
-      expect(result.result).toHaveLength(2); // 1 comment
+      expect(result.result).toHaveLength(3); // 1 comment + 1 newline + 1 EOF
       expect(result.result[0].type).toBe(TokenType.COMMENT);
     });
 

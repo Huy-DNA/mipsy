@@ -116,7 +116,6 @@ export function lex(source: string): Result<Token[], Error[]> {
     while (!isAtEnd() && peek() !== "\n") {
       advance();
     }
-    advance();
   }
 
   while (!isAtEnd()) {
