@@ -1,12 +1,14 @@
-import type { Token } from "./lex";
+import { TokenType, type Token } from "./lex";
+import type { Error, Result } from "./types";
 
 export enum NodeType {
-  BLOCK,
-  DATA_SECTION,
-  CODE_SECTION,
-  UNKNOWN_SECTION,
+  PROGRAM,
   DIRECTIVE,
+  DIRECTIVE_ARG,
   INSTRUCTION,
+  INSTRUCTION_IMMEDIATE,
+  INSTRUCTION_REGISTER,
+  INSTRUCTION_LABEL,
   LABEL,
 }
 
@@ -16,36 +18,45 @@ export interface Node {
   end: number;
 }
 
+export interface ProgramNode {
+  type: NodeType.PROGRAM;
+  body: Node[];
+}
+
 export interface DirectiveNode extends Node {
   type: NodeType.DIRECTIVE;
-  args: Token[];
+  args: DirectiveArgumentNode[];
+}
+
+export interface DirectiveArgumentNode extends Node {
+  type: NodeType.DIRECTIVE_ARG;
+  tokens: Token[];
 }
 
 export interface InstructionNode extends Node {
   type: NodeType.INSTRUCTION;
-  args: Token[];
+  args: InstructionArgumentNode[];
 }
+
+export interface InstructionImmediateNode extends Node {
+  type: NodeType.INSTRUCTION_IMMEDIATE;
+  tokens: Token[];
+}
+
+export interface InstructionRegisterNode extends Node {
+  type: NodeType.INSTRUCTION_REGISTER;
+  tokens: Token[];
+}
+
+export interface InstructionLabelNode extends Node {
+  type: NodeType.INSTRUCTION_LABEL;
+  tokens: Token[];
+}
+
+export type InstructionArgumentNode = InstructionRegisterNode | InstructionLabelNode | InstructionImmediateNode;
 
 export interface LabelNode extends Node {
   type: NodeType.LABEL;
+  tokens: Token[];
 }
 
-export interface BlockNode extends Node {
-  type: NodeType.BLOCK;
-  instructions: Node[];
-}
-
-export interface DataSectionNode extends Node {
-  type: NodeType.DATA_SECTION;
-  directives: DirectiveNode[];
-}
-
-export interface CodeSectionNode extends Node {
-  type: NodeType.CODE_SECTION;
-  instructions: (DirectiveNode | InstructionNode)[];
-}
-
-export interface UnknownSectionNode extends Node {
-  type: NodeType.UNKNOWN_SECTION;
-  instructions: (DirectiveNode | InstructionNode)[];
-}
