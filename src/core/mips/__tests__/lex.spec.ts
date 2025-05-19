@@ -6,13 +6,13 @@ describe('MIPS Lexer', () => {
     it('should tokenize empty input', () => {
       const result = lex('');
       expect(result.errors).toHaveLength(0);
-      expect(result.result).toHaveLength(0);
+      expect(result.result).toHaveLength(1);
     });
 
     it('should tokenize whitespace', () => {
       const result = lex('  \t');
       expect(result.errors).toHaveLength(0);
-      expect(result.result).toHaveLength(3);
+      expect(result.result).toHaveLength(4);
       expect(result.result[0].type).toBe(TokenType.SPACE);
       expect(result.result[1].type).toBe(TokenType.SPACE);
     });
@@ -20,7 +20,7 @@ describe('MIPS Lexer', () => {
     it('should tokenize newlines', () => {
       const result = lex('\n\r\n');
       expect(result.errors).toHaveLength(0);
-      expect(result.result).toHaveLength(2);
+      expect(result.result).toHaveLength(3);
       expect(result.result[0].type).toBe(TokenType.NEWLINE);
       expect(result.result[1].type).toBe(TokenType.NEWLINE);
     });
@@ -30,7 +30,7 @@ describe('MIPS Lexer', () => {
     it('should tokenize valid numeric registers', () => {
       const result = lex('$0 $1 $31');
       expect(result.errors).toHaveLength(0);
-      expect(result.result).toHaveLength(5); // 3 registers + 2 spaces
+      expect(result.result).toHaveLength(6); // 3 registers + 2 spaces + 1 EOF
       expect(result.result[0].type).toBe(TokenType.REGISTER);
       expect(result.result[2].type).toBe(TokenType.REGISTER);
       expect(result.result[4].type).toBe(TokenType.REGISTER);
@@ -39,7 +39,7 @@ describe('MIPS Lexer', () => {
     it('should tokenize valid named registers', () => {
       const result = lex('$t0 $a1 $ra');
       expect(result.errors).toHaveLength(0);
-      expect(result.result).toHaveLength(5); // 3 registers + 2 spaces
+      expect(result.result).toHaveLength(6); // 3 registers + 2 spaces + 1 EOF
       expect(result.result[0].type).toBe(TokenType.REGISTER);
       expect(result.result[2].type).toBe(TokenType.REGISTER);
       expect(result.result[4].type).toBe(TokenType.REGISTER);
@@ -48,7 +48,7 @@ describe('MIPS Lexer', () => {
     it('should handle invalid registers', () => {
       const result = lex('$x0 $invalid');
       expect(result.errors).toHaveLength(2);
-      expect(result.result).toHaveLength(3); // 2 invalid registers + 1 space
+      expect(result.result).toHaveLength(4); // 2 invalid registers + 1 space + 1 EOF
       expect(result.result[0].type).toBe(TokenType.INVALID);
       expect(result.result[2].type).toBe(TokenType.INVALID);
       expect(result.errors[0].message).toContain('Invalid register');
@@ -60,7 +60,7 @@ describe('MIPS Lexer', () => {
     it('should tokenize integer numbers', () => {
       const result = lex('123 456');
       expect(result.errors).toHaveLength(0);
-      expect(result.result).toHaveLength(3); // 2 numbers + 1 space
+      expect(result.result).toHaveLength(4); // 2 numbers + 1 space + 1 EOF
       expect(result.result[0].type).toBe(TokenType.NUMBER);
       expect(result.result[2].type).toBe(TokenType.NUMBER);
     });
@@ -70,7 +70,7 @@ describe('MIPS Lexer', () => {
     it('should tokenize identifiers', () => {
       const result = lex('add sub move');
       expect(result.errors).toHaveLength(0);
-      expect(result.result).toHaveLength(5); // 3 identifiers + 2 spaces
+      expect(result.result).toHaveLength(6); // 3 identifiers + 2 spaces + 1 EOF
       expect(result.result[0].type).toBe(TokenType.IDENTIFIER);
       expect(result.result[2].type).toBe(TokenType.IDENTIFIER);
       expect(result.result[4].type).toBe(TokenType.IDENTIFIER);
@@ -79,7 +79,7 @@ describe('MIPS Lexer', () => {
     it('should tokenize labels', () => {
       const result = lex('main: loop: exit:');
       expect(result.errors).toHaveLength(0);
-      expect(result.result).toHaveLength(5); // 3 labels + 2 spaces
+      expect(result.result).toHaveLength(6); // 3 labels + 2 spaces + 1 EOF
       expect(result.result[0].type).toBe(TokenType.LABEL);
       expect(result.result[2].type).toBe(TokenType.LABEL);
       expect(result.result[4].type).toBe(TokenType.LABEL);
@@ -88,7 +88,7 @@ describe('MIPS Lexer', () => {
     it('should tokenize identifiers with underscores and numbers', () => {
       const result = lex('_var1 test_123');
       expect(result.errors).toHaveLength(0);
-      expect(result.result).toHaveLength(3); // 2 identifiers + 1 space
+      expect(result.result).toHaveLength(4); // 2 identifiers + 1 space + 1 EOF
       expect(result.result[0].type).toBe(TokenType.IDENTIFIER);
       expect(result.result[2].type).toBe(TokenType.IDENTIFIER);
     });
@@ -98,7 +98,7 @@ describe('MIPS Lexer', () => {
     it('should tokenize directives', () => {
       const result = lex('.data .text .word');
       expect(result.errors).toHaveLength(0);
-      expect(result.result).toHaveLength(5); // 3 directives + 2 spaces
+      expect(result.result).toHaveLength(6); // 3 directives + 2 spaces + 1 EOF
       expect(result.result[0].type).toBe(TokenType.DIRECTIVE);
       expect(result.result[2].type).toBe(TokenType.DIRECTIVE);
       expect(result.result[4].type).toBe(TokenType.DIRECTIVE);
@@ -109,21 +109,21 @@ describe('MIPS Lexer', () => {
     it('should tokenize double quote strings', () => {
       const result = lex('"hello world"');
       expect(result.errors).toHaveLength(0);
-      expect(result.result).toHaveLength(1);
+      expect(result.result).toHaveLength(2);
       expect(result.result[0].type).toBe(TokenType.STRING);
     });
 
     it('should tokenize single quote strings', () => {
       const result = lex("'hello world'");
       expect(result.errors).toHaveLength(0);
-      expect(result.result).toHaveLength(1);
+      expect(result.result).toHaveLength(2);
       expect(result.result[0].type).toBe(TokenType.STRING);
     });
 
     it('should handle unclosed strings', () => {
       const result = lex('"unclosed string');
       expect(result.errors).toHaveLength(1);
-      expect(result.result).toHaveLength(1);
+      expect(result.result).toHaveLength(2);
       expect(result.result[0].type).toBe(TokenType.INVALID);
       expect(result.errors[0].message).toContain('Unclosed string');
     });
@@ -133,7 +133,7 @@ describe('MIPS Lexer', () => {
     it('should tokenize comments', () => {
       const result = lex('# This is a comment\n');
       expect(result.errors).toHaveLength(0);
-      expect(result.result).toHaveLength(1); // 1 comment
+      expect(result.result).toHaveLength(2); // 1 comment
       expect(result.result[0].type).toBe(TokenType.COMMENT);
     });
 
@@ -148,7 +148,7 @@ describe('MIPS Lexer', () => {
     it('should tokenize commas', () => {
       const result = lex(',,,');
       expect(result.errors).toHaveLength(0);
-      expect(result.result).toHaveLength(3);
+      expect(result.result).toHaveLength(4);
       expect(result.result[0].type).toBe(TokenType.COMMA);
       expect(result.result[1].type).toBe(TokenType.COMMA);
       expect(result.result[2].type).toBe(TokenType.COMMA);
@@ -157,7 +157,7 @@ describe('MIPS Lexer', () => {
     it('should tokenize parentheses', () => {
       const result = lex('()()');
       expect(result.errors).toHaveLength(0);
-      expect(result.result).toHaveLength(4);
+      expect(result.result).toHaveLength(5);
       expect(result.result[0].type).toBe(TokenType.LEFT_PAREN);
       expect(result.result[1].type).toBe(TokenType.RIGHT_PAREN);
       expect(result.result[2].type).toBe(TokenType.LEFT_PAREN);
@@ -201,7 +201,7 @@ describe('MIPS Lexer', () => {
     it('should tokenize a simple MIPS instruction', () => {
       const result = lex('add $t0, $t1, $t2');
       expect(result.errors).toHaveLength(0);
-      expect(result.result).toHaveLength(9); // 1 identifier + 3 registers + 2 commas + 3 spaces
+      expect(result.result).toHaveLength(10); // 1 identifier + 3 registers + 2 commas + 3 spaces + 1 EOF
 
       expect(result.result[0].type).toBe(TokenType.IDENTIFIER); // add
       expect(result.result[2].type).toBe(TokenType.REGISTER);   // $t0

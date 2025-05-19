@@ -1,4 +1,4 @@
-import type { Error, Position, Result } from "./types";
+import { registers, type Error, type Position, type Result } from "./types";
 
 export enum TokenType {
   IDENTIFIER,
@@ -148,7 +148,7 @@ export function lex(source: string): Result<Token[], Error[]> {
         break;
       case "$":
         const name = register();
-        if (["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "v0", "v1", "a0", "a1", "a2", "a3", "t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7", "t8", "t9", "s0", "s1", "s2", "s3", "s4", "s5", "s6", "s7", "ra", "sp", "bp"].includes(name)) {
+        if (Object.keys(registers).includes(name)) {
           result.push({ type: TokenType.REGISTER, start, end: { ...current } });
         } else {
           result.push({ type: TokenType.INVALID, start, end: { ...current } });
