@@ -108,7 +108,7 @@ describe('Parser', () => {
     const instr3 = nodes[2] as any;
     expect(source.slice(instr3.op.start.offset, instr3.op.end.offset)).toBe('j');
     expect(instr3.args.length).toBe(1);
-    expect(instr3.args[0].type).toBe(NodeType.INSTRUCTION_LABEL);
+    expect(instr3.args[0].type).toBe(NodeType.INSTRUCTION_IMMEDIATE);
   });
 
   it('should handle whitespace and comments', () => {
@@ -167,7 +167,7 @@ exit:
     const labels = nodes.filter(n => n.type === NodeType.LABEL).length;
 
     expect(directives).toBe(4); // .data, .asciiz, .word, .text
-    expect(labels).toBe(3);     // message:, main:, loop:, exit:
-    expect(instructions).toBe(11); // All the assembly instructions
+    expect(labels).toBe(5);     // message:, numbers:, main:, loop:, exit:
+    expect(instructions).toBe(12); // All the assembly instructions
   });
 });

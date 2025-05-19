@@ -45,18 +45,13 @@ export interface InstructionRegisterNode extends Node {
   register: Token;
 }
 
-export interface InstructionLabelNode extends Node {
-  type: NodeType.INSTRUCTION_LABEL;
-  label: Token;
-}
-
 export interface InstructionDisplacementNode extends Node {
   type: NodeType.INSTRUCTION_DISPLACEMENT;
   disp: Token;
   register: Token;
 }
 
-export type InstructionArgumentNode = InstructionRegisterNode | InstructionLabelNode | InstructionImmediateNode | InstructionDisplacementNode;
+export type InstructionArgumentNode = InstructionRegisterNode | InstructionImmediateNode | InstructionDisplacementNode;
 
 export interface LabelNode extends Node {
   type: NodeType.LABEL;
@@ -131,6 +126,7 @@ export function parse(source: string, tokens: Token[]): Result<Node[], Error[]> 
   }
 
   function registerArgument(): InstructionRegisterNode {
+    skipWhitespaces();
     const register = advance();
     return {
       type: NodeType.INSTRUCTION_REGISTER,
@@ -140,17 +136,8 @@ export function parse(source: string, tokens: Token[]): Result<Node[], Error[]> 
     };
   }
 
-  function labelArgument(): InstructionLabelNode {
-    const label = advance();
-    return {
-      type: NodeType.INSTRUCTION_LABEL,
-      label,
-      start: label.start.offset,
-      end: label.end.offset
-    };
-  }
-
   function immediateArgument(): InstructionImmediateNode {
+    skipWhitespaces();
     const immediate = advance();
     return {
       type: NodeType.INSTRUCTION_IMMEDIATE,
@@ -161,6 +148,7 @@ export function parse(source: string, tokens: Token[]): Result<Node[], Error[]> 
   }
 
   function displacementArgument(): InstructionDisplacementNode | null {
+    skipWhitespaces();
     const disp = advance();
 
     skipWhitespaces();
@@ -199,8 +187,6 @@ export function parse(source: string, tokens: Token[]): Result<Node[], Error[]> 
         return registerArgument();
 
       case TokenType.IDENTIFIER:
-        return labelArgument();
-
       case TokenType.NUMBER:
         if (peekNextWithoutWhitespaces().type === TokenType.LEFT_PAREN) {
           return displacementArgument();
@@ -209,7 +195,7 @@ export function parse(source: string, tokens: Token[]): Result<Node[], Error[]> 
         }
 
       default:
-        recover("Expected an instruction argument (register, label, displacement or immediate)");
+        recover("Expected an instruction argument (register, displacement or immediate)");
         return null;
     }
   }
