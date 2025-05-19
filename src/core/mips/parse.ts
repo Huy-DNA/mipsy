@@ -72,6 +72,17 @@ export function parse(source: string, tokens: Token[]): Result<Node[], Error[]> 
     return tokens[current];
   }
 
+  function peekNextWithoutWhitespaces(): Token {
+    let start = current;
+    while (start < tokens.length) {
+      start += 1;
+      if (![TokenType.COMMENT, TokenType.TAB, TokenType.SPACE].includes(tokens[start].type)) {
+        return tokens[start];
+      }
+    }
+    return tokens[tokens.length - 1];
+  }
+
   function advance(): Token {
     if (isAtEnd()) return peek();
     const token = peek();
@@ -108,7 +119,7 @@ export function parse(source: string, tokens: Token[]): Result<Node[], Error[]> 
     skipWhitespaces();
     let start = current;
     if (!match(TokenType.LABEL)) {
-      recover("Expect a label");
+      recover("Expected a label");
       return;
     }
     nodes.push({
@@ -191,8 +202,7 @@ export function parse(source: string, tokens: Token[]): Result<Node[], Error[]> 
         return labelArgument();
 
       case TokenType.NUMBER:
-        skipWhitespaces();
-        if (peek().type === TokenType.LEFT_PAREN) {
+        if (peekNextWithoutWhitespaces().type === TokenType.LEFT_PAREN) {
           return displacementArgument();
         } else {
           return immediateArgument();
@@ -210,7 +220,7 @@ export function parse(source: string, tokens: Token[]): Result<Node[], Error[]> 
     const op = peek();
     const opName = source.slice(op.start.offset, op.end.offset);
 
-    if (!opName.startsWith('$') || !Object.keys(ops).includes(opName.slice(1))) {
+    if (!Object.keys(ops).includes(opName)) {
       recover(`Unknown instruction '${opName}'`);
       return;
     }
@@ -224,15 +234,17 @@ export function parse(source: string, tokens: Token[]): Result<Node[], Error[]> 
       const arg = instructionArgument();
       if (arg) args.push(arg);
 
+      skipWhitespaces();
       while (peek().type !== TokenType.NEWLINE && peek().type !== TokenType.EOF) {
-        skipWhitespaces();
         if (!match(TokenType.COMMA)) {
           recover("Expected comma between instruction arguments");
           break;
         }
+        skipWhitespaces();
 
         const arg = instructionArgument();
         if (arg) args.push(arg);
+        skipWhitespaces();
       }
     }
 
@@ -244,6 +256,7 @@ export function parse(source: string, tokens: Token[]): Result<Node[], Error[]> 
       end: tokens[current - 1].end.offset
     } as InstructionNode);
 
+    skipWhitespaces();
     match(TokenType.NEWLINE);
   }
 
@@ -293,8 +306,8 @@ export function parse(source: string, tokens: Token[]): Result<Node[], Error[]> 
       const arg = directiveArgument();
       if (arg) args.push(arg);
 
+      skipWhitespaces();
       while (peek().type !== TokenType.NEWLINE && peek().type !== TokenType.EOF) {
-        skipWhitespaces();
         if (!match(TokenType.COMMA)) {
           recover("Expected comma between directive arguments");
           break;
@@ -303,6 +316,7 @@ export function parse(source: string, tokens: Token[]): Result<Node[], Error[]> 
         skipWhitespaces();
         const arg = directiveArgument();
         if (arg) args.push(arg);
+        skipWhitespaces();
       }
     }
 
@@ -314,6 +328,7 @@ export function parse(source: string, tokens: Token[]): Result<Node[], Error[]> 
       end: tokens[current - 1].end.offset
     } as DirectiveNode);
 
+    skipWhitespaces();
     match(TokenType.NEWLINE);
   }
 
