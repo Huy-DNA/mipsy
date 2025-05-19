@@ -226,7 +226,7 @@ describe('MIPS Lexer', () => {
     it('should tokenize a full MIPS program segment', () => {
       const code = `
 .data
-message: .asciiz "Hello, World!"
+message: .asciiz "\\"Hello, World!\\""
 
 .text
 main:

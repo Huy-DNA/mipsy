@@ -74,7 +74,12 @@ export function lex(source: string): Result<Token[], Error[]> {
   function string(c: string) {
     advance();
     while (!isAtEnd() && peek() !== c) {
-      advance();
+      if (peek() === "\\") {
+        advance();
+        advance();
+      } else {
+        advance();
+      }
     }
     if (peek() === c) {
       advance();
