@@ -207,19 +207,19 @@ exit:
     expect(nodes.length).toBe(3);
 
     // Check position data
-    expect(nodes[0].start).toBe(0); // main: starts at position 0
-    expect(nodes[0].end).toBe(5);   // main: ends at position 5
+    expect(nodes[0].start.offset).toBe(0); // main: starts at position 0
+    expect(nodes[0].end.offset).toBe(5);   // main: ends at position 5
 
     // The 'add' instruction should start after main: and whitespace
-    expect(nodes[1].start).toBe(10);
+    expect(nodes[1].start.offset).toBe(10);
 
     // Check the position of arguments in the instruction
     const addInstr = nodes[1] as any;
-    expect(addInstr.args[0].start < addInstr.args[1].start).toBe(true);
-    expect(addInstr.args[1].start < addInstr.args[2].start).toBe(true);
+    expect(addInstr.args[0].start.offset < addInstr.args[1].start.offset).toBe(true);
+    expect(addInstr.args[1].start.offset < addInstr.args[2].start.offset).toBe(true);
 
     // The jump instruction should be after the add instruction
-    expect(nodes[1].end < nodes[2].start).toBe(true);
+    expect(nodes[1].end.offset < nodes[2].start.offset).toBe(true);
   });
 
   it('should recover from errors and continue parsing', () => {
@@ -313,10 +313,10 @@ label3:
 
     // Check order of labels
     for (let i = 1; i < labels.length; i++) {
-      expect(labels[i - 1].start < labels[i].start).toBe(true);
+      expect(labels[i - 1].start.offset < labels[i].start.offset).toBe(true);
     }
 
     // Check last label is before the instruction
-    expect(labels[labels.length - 1].end < instructions[0].start).toBe(true);
+    expect(labels[labels.length - 1].end.offset < instructions[0].start.offset).toBe(true);
   });
 });

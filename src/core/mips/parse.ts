@@ -1,5 +1,5 @@
 import { TokenType, type Token } from "./lex";
-import { directives, ops, type Error, type Result } from "./types";
+import { directives, ops, type Error, type Position, type Result } from "./types";
 
 export enum NodeType {
   DIRECTIVE,
@@ -14,8 +14,8 @@ export enum NodeType {
 
 export interface Node {
   type: NodeType;
-  start: number;
-  end: number;
+  start: Position;
+  end: Position;
 }
 
 export interface DirectiveNode extends Node {
@@ -120,8 +120,8 @@ export function parse(source: string, tokens: Token[]): Result<Node[], Error[]> 
     nodes.push({
       type: NodeType.LABEL,
       tokens: tokens.slice(start, current),
-      start: tokens[start].start.offset,
-      end: tokens[current - 1].end.offset
+      start: tokens[start].start,
+      end: tokens[current - 1].end,
     } as LabelNode);
   }
 
@@ -131,8 +131,8 @@ export function parse(source: string, tokens: Token[]): Result<Node[], Error[]> 
     return {
       type: NodeType.INSTRUCTION_REGISTER,
       register,
-      start: register.start.offset,
-      end: register.end.offset
+      start: register.start,
+      end: register.end,
     };
   }
 
@@ -142,8 +142,8 @@ export function parse(source: string, tokens: Token[]): Result<Node[], Error[]> 
     return {
       type: NodeType.INSTRUCTION_IMMEDIATE,
       immediate,
-      start: immediate.start.offset,
-      end: immediate.end.offset
+      start: immediate.start,
+      end: immediate.end,
     };
   }
 
@@ -175,8 +175,8 @@ export function parse(source: string, tokens: Token[]): Result<Node[], Error[]> 
       type: NodeType.INSTRUCTION_DISPLACEMENT,
       disp,
       register,
-      start: disp.start.offset,
-      end: tokens[current - 1].end.offset
+      start: disp.start,
+      end: tokens[current - 1].end,
     };
   }
 
@@ -238,8 +238,8 @@ export function parse(source: string, tokens: Token[]): Result<Node[], Error[]> 
       type: NodeType.INSTRUCTION,
       op,
       args,
-      start: tokens[start].start.offset,
-      end: tokens[current - 1].end.offset
+      start: tokens[start].start,
+      end: tokens[current - 1].end,
     } as InstructionNode);
 
     skipWhitespaces();
@@ -265,8 +265,8 @@ export function parse(source: string, tokens: Token[]): Result<Node[], Error[]> 
     return {
       type: NodeType.DIRECTIVE_ARG,
       tokens: args,
-      start: args[0].start.offset,
-      end: args[args.length - 1].end.offset
+      start: args[0].start,
+      end: args[args.length - 1].end,
     };
   }
 
@@ -310,8 +310,8 @@ export function parse(source: string, tokens: Token[]): Result<Node[], Error[]> 
       type: NodeType.DIRECTIVE,
       op,
       args,
-      start: tokens[start].start.offset,
-      end: tokens[current - 1].end.offset
+      start: tokens[start].start,
+      end: tokens[current - 1].end,
     } as DirectiveNode);
 
     skipWhitespaces();
