@@ -128,3 +128,162 @@ export const ops = {
   // MIPS32 Rev 2 - these are included for completeness though not in original MIPS I
   "mul": { type: "R", opcode: 0x1C, funct: 0x02 } // In MIPS32 Rev 2, this is a real instruction
 }
+
+export const directives = {
+  // Data Definition Directives
+  ".align": {
+    description: "Aligns the next data item on a specified byte boundary (power of 2)",
+    example: ".align 2  # Align to word boundary (2^2 = 4 bytes)",
+    syntax: ".align n"
+  },
+  ".ascii": {
+    description: "Stores an ASCII string (without null termination)",
+    example: '.ascii "Hello World"',
+    syntax: '.ascii "string"'
+  },
+  ".asciiz": {
+    description: "Stores an ASCII string with null termination (\\0)",
+    example: '.asciiz "Hello World\\n"',
+    syntax: '.asciiz "string"'
+  },
+  ".byte": {
+    description: "Allocates and initializes one or more bytes of storage",
+    example: ".byte 10, 20, 30  # Three consecutive bytes",
+    syntax: ".byte b1, b2, ..., bn"
+  },
+  ".data": {
+    description: "Indicates the start of the data segment",
+    example: ".data  # Begin data segment",
+    syntax: ".data [address]"
+  },
+  ".double": {
+    description: "Allocates and initializes double-precision floating point values (8 bytes)",
+    example: ".double 3.14159265358979",
+    syntax: ".double d1, d2, ..., dn"
+  },
+  ".float": {
+    description: "Allocates and initializes single-precision floating point values (4 bytes)",
+    example: ".float 3.14, 2.71  # Two consecutive floats",
+    syntax: ".float f1, f2, ..., fn"
+  },
+  ".half": {
+    description: "Allocates and initializes 16-bit halfwords (2 bytes)",
+    example: ".half 10, 20  # Two consecutive halfwords",
+    syntax: ".half h1, h2, ..., hn"
+  },
+  ".space": {
+    description: "Allocates the specified number of blank bytes",
+    example: ".space 100  # Reserve 100 bytes of space",
+    syntax: ".space n"
+  },
+  ".word": {
+    description: "Allocates and initializes one or more 32-bit words (4 bytes)",
+    example: ".word 0x10010000, 0xFFFFFFFF  # Two consecutive words",
+    syntax: ".word w1, w2, ..., wn"
+  },
+
+  // Text and Code Directives
+  ".text": {
+    description: "Indicates the start of the code segment",
+    example: ".text  # Begin code segment",
+    syntax: ".text [address]"
+  },
+  ".code": {
+    description: "Synonym for .text directive",
+    example: ".code  # Begin code segment",
+    syntax: ".code [address]"
+  },
+  ".globl": {
+    description: "Declares a symbol as global (accessible from other files)",
+    example: ".globl main  # Export main label",
+    syntax: ".globl symbol"
+  },
+  ".extern": {
+    description: "Declares a symbol as external (defined in another file)",
+    example: ".extern printf  # External function",
+    syntax: ".extern symbol, size"
+  },
+
+  // Symbol and Label Directives
+  ".set": {
+    description: "Sets the value of a symbol",
+    example: ".set noat  # Disable warnings about using $1 (assembler temporary)",
+    syntax: ".set symbol, expression or .set option"
+  },
+  ".eqv": {
+    description: "Text substitution (similar to a macro definition)",
+    example: ".eqv SIZE 100  # Define SIZE as 100",
+    syntax: ".eqv symbol, expression"
+  },
+  ".macro": {
+    description: "Begins a macro definition",
+    example: ".macro push($r)  # Define push macro",
+    syntax: ".macro name(args)"
+  },
+  ".end_macro": {
+    description: "Ends a macro definition",
+    example: ".end_macro  # End of macro definition",
+    syntax: ".end_macro"
+  },
+
+  // Segment and Section Control
+  ".kdata": {
+    description: "Indicates the start of the kernel data segment",
+    example: ".kdata  # Begin kernel data segment",
+    syntax: ".kdata [address]"
+  },
+  ".ktext": {
+    description: "Indicates the start of the kernel code segment",
+    example: ".ktext 0x80000000  # Begin kernel code segment at specified address",
+    syntax: ".ktext [address]"
+  },
+  ".section": {
+    description: "Specifies a named section for code or data",
+    example: ".section .rodata  # Read-only data section",
+    syntax: ".section name, flags"
+  },
+
+  // File and Line Information
+  ".file": {
+    description: "Specifies a filename for debugging information",
+    example: '.file "main.s"',
+    syntax: '.file "filename"'
+  },
+  ".line": {
+    description: "Specifies a line number for debugging information",
+    example: ".line 10",
+    syntax: ".line line_number"
+  },
+  ".ent": {
+    description: "Marks the beginning of a function for debugging",
+    example: ".ent main  # Begin function main",
+    syntax: ".ent function_name"
+  },
+  ".end": {
+    description: "Marks the end of a function for debugging",
+    example: ".end main  # End function main",
+    syntax: ".end function_name"
+  },
+
+  // Miscellaneous
+  ".org": {
+    description: "Sets the location counter to an absolute expression",
+    example: ".org 0x10010000  # Set current address",
+    syntax: ".org address"
+  },
+  ".repeat": {
+    description: "Repeats a block of code a specified number of times",
+    example: ".repeat 5  # Repeat the following block 5 times",
+    syntax: ".repeat count"
+  },
+  ".endr": {
+    description: "Ends a repetition block",
+    example: ".endr  # End of repeat block",
+    syntax: ".endr"
+  },
+  ".include": {
+    description: "Includes source from another file",
+    example: '.include "macros.s"  # Include macros file',
+    syntax: '.include "filename"'
+  }
+};

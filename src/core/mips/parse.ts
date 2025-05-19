@@ -1,8 +1,7 @@
 import { TokenType, type Token } from "./lex";
-import { ops, type Error, type Result } from "./types";
+import { directives, ops, type Error, type Result } from "./types";
 
 export enum NodeType {
-  PROGRAM,
   DIRECTIVE,
   DIRECTIVE_ARG,
   INSTRUCTION,
@@ -19,13 +18,9 @@ export interface Node {
   end: number;
 }
 
-export interface ProgramNode {
-  type: NodeType.PROGRAM;
-  body: Node[];
-}
-
 export interface DirectiveNode extends Node {
   type: NodeType.DIRECTIVE;
+  op: Token;
   args: DirectiveArgumentNode[];
 }
 
@@ -68,7 +63,7 @@ export interface LabelNode extends Node {
   tokens: Token[];
 }
 
-export function parse(source: string, tokens: Token[]): Result<Node, Error[]> {
+export function parse(source: string, tokens: Token[]): Result<Node[], Error[]> {
   let current = 0;
   const nodes: Node[] = [];
   const errors: Error[] = [];
@@ -100,11 +95,11 @@ export function parse(source: string, tokens: Token[]): Result<Node, Error[]> {
     while (!isAtEnd() && !match(TokenType.NEWLINE)) {
       advance();
     }
-    errors.push({ start: tokens[start].start, end: tokens[current].end, message });
+    errors.push({ start: tokens[start].start, end: tokens[current - 1].end, message });
   }
 
   function skipWhitespaces() {
-    while (match(TokenType.TAB, TokenType.SPACE)) {
+    while (match(TokenType.TAB, TokenType.SPACE, TokenType.COMMENT)) {
       continue;
     }
   }
@@ -116,7 +111,97 @@ export function parse(source: string, tokens: Token[]): Result<Node, Error[]> {
       recover("Expect a label");
       return;
     }
-    nodes.push({ type: NodeType.LABEL, tokens: tokens.slice(start, current), start, end: current } as LabelNode);
+    nodes.push({
+      type: NodeType.LABEL,
+      tokens: tokens.slice(start, current),
+      start: tokens[start].start.offset,
+      end: tokens[current - 1].end.offset
+    } as LabelNode);
+  }
+
+  function registerArgument(): InstructionRegisterNode {
+    const register = advance();
+    return {
+      type: NodeType.INSTRUCTION_REGISTER,
+      register,
+      start: register.start.offset,
+      end: register.end.offset
+    };
+  }
+
+  function labelArgument(): InstructionLabelNode {
+    const label = advance();
+    return {
+      type: NodeType.INSTRUCTION_LABEL,
+      label,
+      start: label.start.offset,
+      end: label.end.offset
+    };
+  }
+
+  function immediateArgument(): InstructionImmediateNode {
+    const immediate = advance();
+    return {
+      type: NodeType.INSTRUCTION_IMMEDIATE,
+      immediate,
+      start: immediate.start.offset,
+      end: immediate.end.offset
+    };
+  }
+
+  function displacementArgument(): InstructionDisplacementNode | null {
+    const disp = advance();
+
+    skipWhitespaces();
+    if (!match(TokenType.LEFT_PAREN)) {
+      recover("Expected '(' after displacement value");
+      return null;
+    }
+
+    skipWhitespaces();
+    if (peek().type !== TokenType.REGISTER) {
+      recover("Expected register in displacement addressing mode");
+      return null;
+    }
+
+    const register = advance();
+
+    skipWhitespaces();
+    if (!match(TokenType.RIGHT_PAREN)) {
+      recover("Expected ')' after register in displacement addressing mode");
+      return null;
+    }
+
+    return {
+      type: NodeType.INSTRUCTION_DISPLACEMENT,
+      disp,
+      register,
+      start: disp.start.offset,
+      end: tokens[current - 1].end.offset
+    };
+  }
+
+  function instructionArgument(): InstructionArgumentNode | null {
+    skipWhitespaces();
+    switch (peek().type) {
+      case TokenType.REGISTER:
+        return registerArgument();
+
+      case TokenType.IDENTIFIER:
+        return labelArgument();
+
+      case TokenType.NUMBER:
+        skipWhitespaces();
+        if (peek().type === TokenType.LEFT_PAREN) {
+          return displacementArgument();
+        } else {
+          return immediateArgument();
+        }
+
+      default:
+        recover("Expected an instruction argument (register, label, displacement or immediate)");
+        return null;
+    }
   }
 
   function instruction() {
@@ -124,24 +209,118 @@ export function parse(source: string, tokens: Token[]): Result<Node, Error[]> {
     let start = current;
     const op = peek();
     const opName = source.slice(op.start.offset, op.end.offset);
-    if (!Object.keys(ops).includes(opName)) {
+
+    if (!opName.startsWith('$') || !Object.keys(ops).includes(opName.slice(1))) {
       recover(`Unknown instruction '${opName}'`);
       return;
     }
-    if (!match(TokenType.IDENTIFIER)) {
-      recover("Expect an instruction name");
-      return;
-    }
+
+    advance();
+
+    const args: InstructionArgumentNode[] = [];
 
     skipWhitespaces();
-    // ...
+    if (peek().type !== TokenType.NEWLINE && peek().type !== TokenType.EOF) {
+      const arg = instructionArgument();
+      if (arg) args.push(arg);
+
+      while (peek().type !== TokenType.NEWLINE && peek().type !== TokenType.EOF) {
+        skipWhitespaces();
+        if (!match(TokenType.COMMA)) {
+          recover("Expected comma between instruction arguments");
+          break;
+        }
+
+        const arg = instructionArgument();
+        if (arg) args.push(arg);
+      }
+    }
+
+    nodes.push({
+      type: NodeType.INSTRUCTION,
+      op,
+      args,
+      start: tokens[start].start.offset,
+      end: tokens[current - 1].end.offset
+    } as InstructionNode);
+
+    match(TokenType.NEWLINE);
+  }
+
+  function directiveArgument(): DirectiveArgumentNode | null {
+    let args: Token[] = [];
+
+    skipWhitespaces();
+    while (!isAtEnd() &&
+      peek().type !== TokenType.COMMA &&
+      peek().type !== TokenType.NEWLINE) {
+      args.push(advance());
+      skipWhitespaces();
+    }
+
+    if (tokens.length === 0) {
+      recover("Expected a directive argument");
+      return null;
+    }
+
+    return {
+      type: NodeType.DIRECTIVE_ARG,
+      tokens: args,
+      start: args[0].start.offset,
+      end: args[args.length - 1].end.offset
+    };
   }
 
   function directive() {
+    skipWhitespaces();
+    let start = current;
+
+    const op = peek();
+    const opName = source.slice(op.start.offset, op.end.offset);
+    if (!match(TokenType.DIRECTIVE)) {
+      recover("Expected a directive");
+      return;
+    }
+    if (!Object.keys(directives).includes(opName)) {
+      recover(`Unknown directive '${opName}'`);
+      return;
+    }
+
+    const args: DirectiveArgumentNode[] = [];
+
+    skipWhitespaces();
+    if (peek().type !== TokenType.NEWLINE && peek().type !== TokenType.EOF) {
+      const arg = directiveArgument();
+      if (arg) args.push(arg);
+
+      while (peek().type !== TokenType.NEWLINE && peek().type !== TokenType.EOF) {
+        skipWhitespaces();
+        if (!match(TokenType.COMMA)) {
+          recover("Expected comma between directive arguments");
+          break;
+        }
+
+        skipWhitespaces();
+        const arg = directiveArgument();
+        if (arg) args.push(arg);
+      }
+    }
+
+    nodes.push({
+      type: NodeType.DIRECTIVE,
+      op,
+      args,
+      start: tokens[start].start.offset,
+      end: tokens[current - 1].end.offset
+    } as DirectiveNode);
+
+    match(TokenType.NEWLINE);
   }
 
   while (!isAtEnd()) {
+    if (match(TokenType.NEWLINE)) continue;
     if (match(TokenType.INVALID)) continue;
+    if (match(TokenType.SPACE, TokenType.TAB, TokenType.COMMENT)) continue;
 
     switch (peek().type) {
       case TokenType.LABEL:
@@ -153,17 +332,13 @@ export function parse(source: string, tokens: Token[]): Result<Node, Error[]> {
       case TokenType.DIRECTIVE:
         directive();
         break;
-      case TokenType.COMMENT:
-      case TokenType.SPACE:
-      case TokenType.TAB:
-      case TokenType.NEWLINE:
       case TokenType.EOF:
-      case TokenType.INVALID:
         break;
-
       default:
-        recover("Expect a directive, an instruction or a label");
+        recover("Expected a directive, instruction, or label");
         break;
     }
   }
+
+  return { result: nodes, errors };
 }
