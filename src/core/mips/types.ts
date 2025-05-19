@@ -193,97 +193,11 @@ export const directives = {
     example: ".code  # Begin code segment",
     syntax: ".code [address]"
   },
-  ".globl": {
-    description: "Declares a symbol as global (accessible from other files)",
-    example: ".globl main  # Export main label",
-    syntax: ".globl symbol"
-  },
-  ".extern": {
-    description: "Declares a symbol as external (defined in another file)",
-    example: ".extern printf  # External function",
-    syntax: ".extern symbol, size"
-  },
-
-  // Symbol and Label Directives
-  ".set": {
-    description: "Sets the value of a symbol",
-    example: ".set noat  # Disable warnings about using $1 (assembler temporary)",
-    syntax: ".set symbol, expression or .set option"
-  },
-  ".eqv": {
-    description: "Text substitution (similar to a macro definition)",
-    example: ".eqv SIZE 100  # Define SIZE as 100",
-    syntax: ".eqv symbol, expression"
-  },
-  ".macro": {
-    description: "Begins a macro definition",
-    example: ".macro push($r)  # Define push macro",
-    syntax: ".macro name(args)"
-  },
-  ".end_macro": {
-    description: "Ends a macro definition",
-    example: ".end_macro  # End of macro definition",
-    syntax: ".end_macro"
-  },
 
   // Segment and Section Control
-  ".kdata": {
-    description: "Indicates the start of the kernel data segment",
-    example: ".kdata  # Begin kernel data segment",
-    syntax: ".kdata [address]"
-  },
-  ".ktext": {
-    description: "Indicates the start of the kernel code segment",
-    example: ".ktext 0x80000000  # Begin kernel code segment at specified address",
-    syntax: ".ktext [address]"
-  },
   ".section": {
     description: "Specifies a named section for code or data",
     example: ".section .rodata  # Read-only data section",
     syntax: ".section name, flags"
   },
-
-  // File and Line Information
-  ".file": {
-    description: "Specifies a filename for debugging information",
-    example: '.file "main.s"',
-    syntax: '.file "filename"'
-  },
-  ".line": {
-    description: "Specifies a line number for debugging information",
-    example: ".line 10",
-    syntax: ".line line_number"
-  },
-  ".ent": {
-    description: "Marks the beginning of a function for debugging",
-    example: ".ent main  # Begin function main",
-    syntax: ".ent function_name"
-  },
-  ".end": {
-    description: "Marks the end of a function for debugging",
-    example: ".end main  # End function main",
-    syntax: ".end function_name"
-  },
-
-  // Miscellaneous
-  ".org": {
-    description: "Sets the location counter to an absolute expression",
-    example: ".org 0x10010000  # Set current address",
-    syntax: ".org address"
-  },
-  ".repeat": {
-    description: "Repeats a block of code a specified number of times",
-    example: ".repeat 5  # Repeat the following block 5 times",
-    syntax: ".repeat count"
-  },
-  ".endr": {
-    description: "Ends a repetition block",
-    example: ".endr  # End of repeat block",
-    syntax: ".endr"
-  },
-  ".include": {
-    description: "Includes source from another file",
-    example: '.include "macros.s"  # Include macros file',
-    syntax: '.include "filename"'
-  }
 };
