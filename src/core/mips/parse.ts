@@ -9,6 +9,7 @@ export enum NodeType {
   INSTRUCTION_IMMEDIATE,
   INSTRUCTION_REGISTER,
   INSTRUCTION_LABEL,
+  INSTRUCTION_DISPLACEMENT,
   LABEL,
 }
 
@@ -35,25 +36,32 @@ export interface DirectiveArgumentNode extends Node {
 
 export interface InstructionNode extends Node {
   type: NodeType.INSTRUCTION;
+  op: Token;
   args: InstructionArgumentNode[];
 }
 
 export interface InstructionImmediateNode extends Node {
   type: NodeType.INSTRUCTION_IMMEDIATE;
-  tokens: Token[];
+  immediate: Token;
 }
 
 export interface InstructionRegisterNode extends Node {
   type: NodeType.INSTRUCTION_REGISTER;
-  tokens: Token[];
+  register: Token;
 }
 
 export interface InstructionLabelNode extends Node {
   type: NodeType.INSTRUCTION_LABEL;
-  tokens: Token[];
+  label: Token;
 }
 
-export type InstructionArgumentNode = InstructionRegisterNode | InstructionLabelNode | InstructionImmediateNode;
+export interface InstructionDisplacementNode extends Node {
+  type: NodeType.INSTRUCTION_DISPLACEMENT;
+  disp: Token;
+  register: Token;
+}
+
+export type InstructionArgumentNode = InstructionRegisterNode | InstructionLabelNode | InstructionImmediateNode | InstructionDisplacementNode;
 
 export interface LabelNode extends Node {
   type: NodeType.LABEL;
