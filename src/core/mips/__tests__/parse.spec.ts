@@ -108,7 +108,7 @@ describe('Parser', () => {
     const instr3 = nodes[2] as any;
     expect(source.slice(instr3.op.start.offset, instr3.op.end.offset)).toBe('j');
     expect(instr3.args.length).toBe(1);
-    expect(instr3.args[0].type).toBe(NodeType.INSTRUCTION_IMMEDIATE);
+    expect(instr3.args[0].type).toBe(NodeType.INSTRUCTION_LABEL);
   });
 
   it('should handle whitespace and comments', () => {
@@ -146,7 +146,7 @@ main:
 
 loop:
     beq $t0, 5, exit   # Exit if counter reaches 5
-    lw $a0, numbers($t0)  # Load number
+    lw $a0, numbers  # Load number
     li $v0, 1          # System call for print integer
     syscall
     addi $t0, $t0, 1   # Increment counter

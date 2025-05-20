@@ -1,5 +1,5 @@
 import { TokenType, type Token } from "./lex";
-import { NodeType, type DirectiveNode, type InstructionDisplacementNode, type InstructionImmediateNode, type InstructionNode, type Node } from "./parse";
+import { NodeType, type DirectiveNode, type InstructionDisplacementNode, type InstructionImmediateNode, type InstructionNode, type LabelNode, type Node } from "./parse";
 import { directives, type Error, type Result } from "./types";
 
 export enum SectionType {
@@ -10,6 +10,7 @@ export enum SectionType {
 export function validate(source: string, tokens: Token[], nodes: Node[]): Result<null, Error[]> {
   let currentSection = SectionType.CODE;
   const errors: Error[] = [];
+  const labels: string[] = [];
 
   function getTokenLexeme(token: Token): string {
     return source.slice(token.start.offset, token.end.offset);
@@ -244,7 +245,7 @@ export function validate(source: string, tokens: Token[], nodes: Node[]): Result
     }
 
     const disp = instruction.args[1];
-    if (disp.type !== NodeType.INSTRUCTION_DISPLACEMENT && disp.type !== NodeType.INSTRUCTION_IMMEDIATE) {
+    if (disp.type !== NodeType.INSTRUCTION_DISPLACEMENT && disp.type !== NodeType.INSTRUCTION_LABEL) {
       errors.push({
         start: disp.start,
         end: disp.end,
@@ -286,7 +287,7 @@ export function validate(source: string, tokens: Token[], nodes: Node[]): Result
     }
 
     const label = instruction.args[2];
-    if (label.type !== NodeType.INSTRUCTION_IMMEDIATE) {
+    if (label.type !== NodeType.INSTRUCTION_LABEL) {
       errors.push({
         start: label.start,
         end: label.end,
@@ -315,7 +316,7 @@ export function validate(source: string, tokens: Token[], nodes: Node[]): Result
     }
 
     const label = instruction.args[1];
-    if (label.type !== NodeType.INSTRUCTION_IMMEDIATE) {
+    if (label.type !== NodeType.INSTRUCTION_LABEL) {
       errors.push({
         start: label.start,
         end: label.end,
@@ -335,7 +336,7 @@ export function validate(source: string, tokens: Token[], nodes: Node[]): Result
     }
 
     const label = instruction.args[0];
-    if (label.type !== NodeType.INSTRUCTION_IMMEDIATE) {
+    if (label.type !== NodeType.INSTRUCTION_LABEL) {
       errors.push({
         start: label.start,
         end: label.end,
@@ -446,7 +447,7 @@ export function validate(source: string, tokens: Token[], nodes: Node[]): Result
     }
 
     const label = instruction.args[1];
-    if (label.type !== NodeType.INSTRUCTION_IMMEDIATE) {
+    if (label.type !== NodeType.INSTRUCTION_LABEL) {
       errors.push({
         start: label.start,
         end: label.end,
@@ -553,6 +554,12 @@ export function validate(source: string, tokens: Token[], nodes: Node[]): Result
 
       default:
         errors.push({ start: instruction.start, end: instruction.end, message: `Unknown instruction ${op}` });
+    }
+  }
+
+  for (const node of nodes) {
+    if (node.type === NodeType.LABEL) {
+      labels.push(getTokenLexeme((node as LabelNode).tokens[0]).slice(0, -1));
     }
   }
 

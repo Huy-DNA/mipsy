@@ -7,6 +7,7 @@ export enum NodeType {
   INSTRUCTION,
   INSTRUCTION_IMMEDIATE,
   INSTRUCTION_REGISTER,
+  INSTRUCTION_LABEL,
   INSTRUCTION_DISPLACEMENT,
   LABEL,
 }
@@ -39,6 +40,11 @@ export interface InstructionImmediateNode extends Node {
   immediate: Token;
 }
 
+export interface InstructionLabelNode extends Node {
+  type: NodeType.INSTRUCTION_LABEL;
+  label: Token;
+}
+
 export interface InstructionRegisterNode extends Node {
   type: NodeType.INSTRUCTION_REGISTER;
   register: Token;
@@ -50,7 +56,7 @@ export interface InstructionDisplacementNode extends Node {
   register: Token;
 }
 
-export type InstructionArgumentNode = InstructionRegisterNode | InstructionImmediateNode | InstructionDisplacementNode;
+export type InstructionArgumentNode = InstructionRegisterNode | InstructionImmediateNode | InstructionLabelNode | InstructionDisplacementNode;
 
 export interface LabelNode extends Node {
   type: NodeType.LABEL;
@@ -135,6 +141,17 @@ export function parse(source: string, tokens: Token[]): Result<Node[], Error[]> 
     };
   }
 
+  function labelArgument(): InstructionLabelNode {
+    skipWhitespaces();
+    const label = advance();
+    return {
+      type: NodeType.INSTRUCTION_LABEL,
+      label,
+      start: label.start,
+      end: label.end,
+    };
+  }
+
   function immediateArgument(): InstructionImmediateNode {
     skipWhitespaces();
     const immediate = advance();
@@ -184,8 +201,8 @@ export function parse(source: string, tokens: Token[]): Result<Node[], Error[]> 
     switch (peek().type) {
       case TokenType.REGISTER:
         return registerArgument();
-
       case TokenType.IDENTIFIER:
+        return labelArgument();
       case TokenType.NUMBER:
         if (peekNextWithoutWhitespaces().type === TokenType.LEFT_PAREN) {
           return displacementArgument();
