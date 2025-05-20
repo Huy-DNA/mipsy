@@ -58,11 +58,13 @@ describe('MIPS Lexer', () => {
 
   describe('Numbers', () => {
     it('should tokenize integer numbers', () => {
-      const result = lex('123 456');
+      const result = lex('123 456 -123 - + 123');
       expect(result.errors).toHaveLength(0);
-      expect(result.result).toHaveLength(4); // 2 numbers + 1 space + 1 EOF
+      expect(result.result).toHaveLength(8); // 4 numbers + 3 space + 1 EOF
       expect(result.result[0].type).toBe(TokenType.NUMBER);
       expect(result.result[2].type).toBe(TokenType.NUMBER);
+      expect(result.result[4].type).toBe(TokenType.NUMBER);
+      expect(result.result[6].type).toBe(TokenType.NUMBER);
     });
   });
 

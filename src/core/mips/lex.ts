@@ -52,7 +52,7 @@ export function lex(source: string): Result<Token[], Error[]> {
     return c;
   }
 
-  function match(chars: string[]): boolean {
+  function match(...chars: string[]): boolean {
     const c = peek();
     if (!c || !chars.includes(c)) return false;
     advance();
@@ -82,6 +82,14 @@ export function lex(source: string): Result<Token[], Error[]> {
       }
     }
     if (peek() === c) {
+      advance();
+    }
+  }
+
+  function prefixedNumber() {
+    while (match("+", "-", "\t", " ")) {
+    }
+    while (!isAtEnd() && isDigit(peek()!)) {
       advance();
     }
   }
@@ -184,6 +192,11 @@ export function lex(source: string): Result<Token[], Error[]> {
           result.push({ type: TokenType.INVALID, start, end: { ...current } });
           errors.push({ start, end: { ...current }, message: "Unclosed string" });
         }
+        break;
+      case "-":
+      case "+":
+        prefixedNumber();
+        result.push({ type: TokenType.NUMBER, start, end: { ...current } });
         break;
       default:
         if (isDigit(c)) {
