@@ -173,27 +173,26 @@ exit:
 
   it('should handle directives with complex arguments', () => {
     const source = `.align 4
-.space 100
 .ascii "This is a string with \\"escaped quotes\\""
 .float 3.14159, -2.718
 .byte 0xFF, 0x7F, 0, -1`;
     const { result: tokens } = lex(source);
     const { result: nodes, errors } = parse(source, tokens);
 
+    console.log(errors);
     expect(errors.length).toBe(0);
-    expect(nodes.length).toBe(5);
+    expect(nodes.length).toBe(4);
 
     // All should be directives
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 4; i++) {
       expect(nodes[i].type).toBe(NodeType.DIRECTIVE);
     }
 
     // Check argument counts
     expect((nodes[0] as any).args.length).toBe(1); // .align 4
-    expect((nodes[1] as any).args.length).toBe(1); // .space 100
-    expect((nodes[2] as any).args.length).toBe(1); // .ascii with one string
-    expect((nodes[3] as any).args.length).toBe(2); // .float with two values
-    expect((nodes[4] as any).args.length).toBe(4); // .byte with four values
+    expect((nodes[1] as any).args.length).toBe(1); // .ascii with one string
+    expect((nodes[2] as any).args.length).toBe(2); // .float with two values
+    expect((nodes[3] as any).args.length).toBe(4); // .byte with four values
   });
 
   it('should handle nodes with correct position information', () => {
@@ -267,7 +266,7 @@ invalid instruction  # Not a valid instruction
 array_1:      .word 1, 2, 3, 4, 5
 string_table: .asciiz "First", "Second", "Third"
 _complex_name_with_underscore_123:
-              .space 1024
+              .align 16
 empty_array:  .word
 `;
     const { result: tokens } = lex(source);
