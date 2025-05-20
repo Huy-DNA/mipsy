@@ -255,7 +255,7 @@ describe('MIPS Validator', () => {
 
   describe('Branch Instruction Validation', () => {
     it('should validate correct branch instructions', () => {
-      const source = `.text\nbeq $t0, $t1, label\nbne $s0, $s1, exit`;
+      const source = `.text\nlabel: beq $t0, $t1, label\nexit: bne $s0, $s1, exit`;
       const lexResult = lex(source);
       const parseResult = parse(source, lexResult.result!);
       const validateResult = validate(source, lexResult.result!, parseResult.result!);
@@ -276,7 +276,7 @@ describe('MIPS Validator', () => {
 
   describe('Branch-Z Instruction Validation', () => {
     it('should validate correct branch-Z instructions', () => {
-      const source = `.text\nbgez $t0, label\nbltz $s0, exit`;
+      const source = `.text\nlabel: bgez $t0, label\nexit: bltz $s0, exit`;
       const lexResult = lex(source);
       const parseResult = parse(source, lexResult.result!);
       const validateResult = validate(source, lexResult.result!, parseResult.result!);
@@ -297,7 +297,7 @@ describe('MIPS Validator', () => {
 
   describe('Jump Instruction Validation', () => {
     it('should validate correct jump instructions', () => {
-      const source = `.text\nj main\njal function`;
+      const source = `.text\nmain:j main\nfunction:jal function`;
       const lexResult = lex(source);
       const parseResult = parse(source, lexResult.result!);
       const validateResult = validate(source, lexResult.result!, parseResult.result!);
@@ -381,11 +381,12 @@ describe('MIPS Validator', () => {
 
   describe('La Instruction Validation', () => {
     it('should validate correct la instructions', () => {
-      const source = `.text\nla $t0, label`;
+      const source = `.text\nlabel: la $t0, label`;
       const lexResult = lex(source);
       const parseResult = parse(source, lexResult.result!);
       const validateResult = validate(source, lexResult.result!, parseResult.result!);
 
+      console.log(validateResult.errors);
       expect(validateResult.errors).toHaveLength(0);
     });
   });
