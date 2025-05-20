@@ -171,7 +171,6 @@ export function validate(source: string, tokens: Token[], nodes: Node[]): Result
         message: `Expected immediate value as shift amount for ${getTokenLexeme(instruction.op)} instruction`
       });
     } else {
-
       const imm = shiftAmount as InstructionImmediateNode;
       const value = Number.parseInt(getTokenLexeme(imm.immediate), 10);
       if (isNaN(value) || value < 0 || value > 31) {
@@ -213,7 +212,6 @@ export function validate(source: string, tokens: Token[], nodes: Node[]): Result
         message: `Expected immediate value as argument 3 for ${getTokenLexeme(instruction.op)} instruction`
       });
     } else {
-
       const immNode = imm as InstructionImmediateNode;
       const value = Number.parseInt(getTokenLexeme(immNode.immediate), 10);
       if (isNaN(value) || value < -32768 || value > 32767) {
