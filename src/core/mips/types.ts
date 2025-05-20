@@ -171,11 +171,6 @@ export const directives = {
     example: ".half 10, 20  # Two consecutive halfwords",
     syntax: ".half h1, h2, ..., hn"
   },
-  ".space": {
-    description: "Allocates the specified number of blank bytes",
-    example: ".space 100  # Reserve 100 bytes of space",
-    syntax: ".space n"
-  },
   ".word": {
     description: "Allocates and initializes one or more 32-bit words (4 bytes)",
     example: ".word 0x10010000, 0xFFFFFFFF  # Two consecutive words",
