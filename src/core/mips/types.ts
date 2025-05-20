@@ -196,3 +196,10 @@ export const directives = {
     syntax: ".section name, flags"
   },
 };
+
+export const TEXT_START = 0x00400000;   // Code section starts at 0x00400000
+export const DATA_START = 0x10000000;   // Data section starts at 0x10000000
+export const STACK_START = 0x7FFFFFFC;  // Stack starts at 0x7FFFFFFC and grows downward
+export const HEAP_START = 0x10040000;   // Heap starts after static data
+
+
