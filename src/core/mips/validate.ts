@@ -16,6 +16,18 @@ export function validate(source: string, tokens: Token[], nodes: Node[]): Result
     return source.slice(token.start.offset, token.end.offset);
   }
 
+  function validateLabelReference(labelNode: any) {
+    const labelText = getTokenLexeme(labelNode.label);
+
+    if (!labels.includes(labelText)) {
+      errors.push({
+        start: labelNode.start,
+        end: labelNode.end,
+        message: `Reference to undefined label '${labelText}'`
+      });
+    }
+  }
+
   function validateDirective(directive: DirectiveNode) {
     let opName: keyof typeof directives = source.slice(directive.op.start.offset, directive.op.end.offset) as any;
     switch (opName) {
@@ -251,6 +263,8 @@ export function validate(source: string, tokens: Token[], nodes: Node[]): Result
         end: disp.end,
         message: `Expected displacement as second argument for ${getTokenLexeme(instruction.op)} instruction`
       });
+    } else if (disp.type === NodeType.INSTRUCTION_LABEL) {
+      validateLabelReference(disp);
     } else if (disp.type === NodeType.INSTRUCTION_DISPLACEMENT) {
 
       const dispNode = disp as InstructionDisplacementNode;
@@ -293,6 +307,8 @@ export function validate(source: string, tokens: Token[], nodes: Node[]): Result
         end: label.end,
         message: `Expected label as argument 3 for ${getTokenLexeme(instruction.op)} instruction`
       });
+    } else {
+      validateLabelReference(label);
     }
   }
 
@@ -322,6 +338,8 @@ export function validate(source: string, tokens: Token[], nodes: Node[]): Result
         end: label.end,
         message: `Expected label as second argument for ${getTokenLexeme(instruction.op)} instruction`
       });
+    } else {
+      validateLabelReference(label);
     }
   }
 
@@ -342,6 +360,8 @@ export function validate(source: string, tokens: Token[], nodes: Node[]): Result
         end: label.end,
         message: `Expected label as argument for ${getTokenLexeme(instruction.op)} instruction`
       });
+    } else {
+      validateLabelReference(label);
     }
   }
 
@@ -453,6 +473,8 @@ export function validate(source: string, tokens: Token[], nodes: Node[]): Result
         end: label.end,
         message: `Expected label as second argument for ${getTokenLexeme(instruction.op)} instruction`
       });
+    } else {
+      validateLabelReference(label);
     }
   }
 
