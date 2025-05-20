@@ -246,13 +246,13 @@ export function validate(source: string, tokens: Token[], nodes: Node[]): Result
     }
 
     const disp = instruction.args[1];
-    if (disp.type !== NodeType.INSTRUCTION_DISPLACEMENT) {
+    if (disp.type !== NodeType.INSTRUCTION_DISPLACEMENT && disp.type !== NodeType.INSTRUCTION_IMMEDIATE) {
       errors.push({
         start: disp.start,
         end: disp.end,
         message: `Expected displacement as second argument for ${getTokenLexeme(instruction.op)} instruction`
       });
-    } else {
+    } else if (disp.type === NodeType.INSTRUCTION_DISPLACEMENT) {
 
       const dispNode = disp as InstructionDisplacementNode;
       const value = Number.parseInt(getTokenLexeme(dispNode.disp), 10);

@@ -179,7 +179,6 @@ exit:
     const { result: tokens } = lex(source);
     const { result: nodes, errors } = parse(source, tokens);
 
-    console.log(errors);
     expect(errors.length).toBe(0);
     expect(nodes.length).toBe(4);
 

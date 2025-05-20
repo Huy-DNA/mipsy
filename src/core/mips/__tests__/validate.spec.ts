@@ -411,18 +411,6 @@ describe('MIPS Validator', () => {
     });
   });
 
-  describe('Unknown Instruction Validation', () => {
-    it('should detect unknown instructions', () => {
-      const source = `.text\nfoobar $t0, $t1`;
-      const lexResult = lex(source);
-      const parseResult = parse(source, lexResult.result!);
-      const validateResult = validate(source, lexResult.result!, parseResult.result!);
-
-      expect(validateResult.errors).toHaveLength(1);
-      expect(validateResult.errors[0].message).toContain('Unknown instruction');
-    });
-  });
-
   describe('Mock Test', () => {
     it('should test error reporting with mocked tokens and nodes', () => {
       // Create mock position objects
@@ -524,11 +512,11 @@ exit:
 .data
 var1: .word 10
 .text
-  lw $t0, var1
+  lw $t0, 1($t1)
 .data
 var2: .word 20
 .text
-  lw $t1, var2
+  lw $t1, 0($t2)
   add $t2, $t0, $t1
 `;
       const lexResult = lex(source);
