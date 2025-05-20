@@ -562,8 +562,10 @@ export function validate(source: string, tokens: Token[], nodes: Node[]): Result
     switch (node.type) {
       case NodeType.DIRECTIVE:
         validateDirective(node as DirectiveNode);
+        break;
       case NodeType.INSTRUCTION:
         validateInstruction(node as InstructionNode);
+        break;
     }
   }
 
