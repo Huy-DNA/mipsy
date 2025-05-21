@@ -4,6 +4,14 @@ import 'splitpanes/dist/splitpanes.css';
 import OutputPane from './components/OutputPane.vue';
 import MainPane from './components/MainPane.vue';
 import SidePane from './components/SidePane.vue';
+import { ref, type Ref } from 'vue';
+import type { Error } from './core/mips/types';
+
+const errors: Ref<Error[]> = ref([]);
+
+function handleErrorsChange(newErrors: Error[]) {
+  errors.value = newErrors;
+}
 </script>
 
 <template>
@@ -19,10 +27,10 @@ import SidePane from './components/SidePane.vue';
         <pane size='70'>
           <splitpanes horizontal>
             <pane size='70'>
-              <MainPane />
+              <MainPane @errors-change="handleErrorsChange" />
             </pane>
             <pane size='30'>
-              <OutputPane />
+              <OutputPane :errors="errors" />
             </pane>
           </splitpanes>
         </pane>
