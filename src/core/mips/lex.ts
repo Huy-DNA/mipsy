@@ -110,31 +110,59 @@ export function lex(source: string): Result<Token[], Error[]> {
 
   function prefixedNumber(): number {
     let sign = 1;
-    let value = 0;
 
-    if (peek() === '-') {
-      sign = -1;
-      advance();
-    } else if (peek() === '+') {
-      advance();
+    while (["-", "+"].includes(peek()!)) {
+      if (peek() === "-") {
+        sign *= -1;
+        advance();
+      } else if (peek() === "+") {
+        advance();
+      }
+      while (match("\t", " ")) { }
     }
 
-    while (match("\t", " ")) { }
-
-    while (!isAtEnd() && isDigit(peek()!)) {
-      value = value * 10 + parseInt(peek()!, 10);
-      advance();
-    }
-
-    return sign * value;
+    return sign * number();
   }
 
   function number(): number {
     let value = 0;
+    let hasDecimal = false;
+    let decimalPlace = 0.1;
 
     while (!isAtEnd() && isDigit(peek()!)) {
       value = value * 10 + parseInt(peek()!, 10);
       advance();
+    }
+
+    if (peek() === '.') {
+      hasDecimal = true;
+      advance();
+
+      while (!isAtEnd() && isDigit(peek()!)) {
+        value += parseInt(peek()!, 10) * decimalPlace;
+        decimalPlace *= 0.1;
+        advance();
+      }
+    }
+
+    if ((peek() === 'e' || peek() === 'E') && !isAtEnd()) {
+      advance();
+      let expSign = 1;
+
+      if (peek() === '-') {
+        expSign = -1;
+        advance();
+      } else if (peek() === '+') {
+        advance();
+      }
+
+      let exponent = 0;
+      while (!isAtEnd() && isDigit(peek()!)) {
+        exponent = exponent * 10 + parseInt(peek()!, 10);
+        advance();
+      }
+
+      value *= Math.pow(10, expSign * exponent);
     }
 
     return value;

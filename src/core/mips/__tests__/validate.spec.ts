@@ -386,7 +386,6 @@ describe('MIPS Validator', () => {
       const parseResult = parse(source, lexResult.result!);
       const validateResult = validate(source, lexResult.result!, parseResult.result!);
 
-      console.log(validateResult.errors);
       expect(validateResult.errors).toHaveLength(0);
     });
   });
