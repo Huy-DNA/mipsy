@@ -29,6 +29,7 @@ export interface Token {
   type: TokenType;
   start: Position;
   end: Position;
+  value?: unknown;
 }
 
 export function lex(source: string): Result<Token[], Error[]> {
@@ -71,34 +72,72 @@ export function lex(source: string): Result<Token[], Error[]> {
     return c >= "a" && c <= "z" || c >= "A" && c <= "Z" || c == "_";
   }
 
-  function string(c: string) {
+  function parseString(delimiter: string): string {
+    let value = "";
+
     advance();
-    while (!isAtEnd() && peek() !== c) {
+
+    while (!isAtEnd() && peek() !== delimiter) {
       if (peek() === "\\") {
         advance();
-        advance();
+
+        const escapeChar = peek();
+        if (escapeChar) {
+          switch (escapeChar) {
+            case 'n': value += '\n'; break;
+            case 't': value += '\t'; break;
+            case 'r': value += '\r'; break;
+            case '0': value += '\0'; break;
+            case '\\': value += '\\'; break;
+            case '\'': value += '\''; break;
+            case '\"': value += '\"'; break;
+            default: value += escapeChar;
+          }
+          advance();
+        }
       } else {
+        value += peek();
         advance();
       }
     }
-    if (peek() === c) {
+
+    if (peek() === delimiter) {
       advance();
     }
+
+    return value;
   }
 
-  function prefixedNumber() {
-    while (match("+", "-", "\t", " ")) {
-    }
-    while (!isAtEnd() && isDigit(peek()!)) {
+  function prefixedNumber(): number {
+    let sign = 1;
+    let value = 0;
+
+    if (peek() === '-') {
+      sign = -1;
+      advance();
+    } else if (peek() === '+') {
       advance();
     }
+
+    while (match("\t", " ")) { }
+
+    while (!isAtEnd() && isDigit(peek()!)) {
+      value = value * 10 + parseInt(peek()!, 10);
+      advance();
+    }
+
+    return sign * value;
   }
 
-  function number() {
-    advance();
+  function number(): number {
+    let value = 0;
+
     while (!isAtEnd() && isDigit(peek()!)) {
+      value = value * 10 + parseInt(peek()!, 10);
       advance();
     }
+
+    return value;
   }
 
   function identifier() {
@@ -185,9 +224,9 @@ export function lex(source: string): Result<Token[], Error[]> {
         break;
       case "\"":
       case "'":
-        string(c);
+        const stringValue = parseString(c);
         if (peekPrev() === c) {
-          result.push({ type: TokenType.STRING, start, end: { ...current } });
+          result.push({ type: TokenType.STRING, start, end: { ...current }, value: stringValue });
         } else {
           result.push({ type: TokenType.INVALID, start, end: { ...current } });
           errors.push({ start, end: { ...current }, message: "Unclosed string" });
@@ -195,13 +234,13 @@ export function lex(source: string): Result<Token[], Error[]> {
         break;
       case "-":
       case "+":
-        prefixedNumber();
-        result.push({ type: TokenType.NUMBER, start, end: { ...current } });
+        const signedValue = prefixedNumber();
+        result.push({ type: TokenType.NUMBER, start, end: { ...current }, value: signedValue });
         break;
       default:
         if (isDigit(c)) {
-          number();
-          result.push({ type: TokenType.NUMBER, start, end: { ...current } });
+          const numValue = number();
+          result.push({ type: TokenType.NUMBER, start, end: { ...current }, value: numValue });
         } else if (isAlpha(c)) {
           identifier();
           if (peek() === ":") {
