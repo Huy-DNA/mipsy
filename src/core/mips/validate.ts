@@ -37,9 +37,8 @@ export function validate(source: string, tokens: Token[], nodes: Node[]): Result
           return;
         }
         for (const arg of directive.args) {
-          const lexeme = getTokenLexeme(arg.tokens[0]);
-          const num = Number.parseInt(lexeme, 10);
-          if (num !== Number(lexeme) || Number.isNaN(num) || num < -128 || num > 255) {
+          const num = arg.tokens[0].value as number;
+          if (num !== Math.floor(num) || num < -128 || num > 255) {
             errors.push({ start: arg.tokens[0].start, end: arg.tokens[0].end, message: 'Invalid byte value in .byte directive' });
           }
           return;
@@ -57,9 +56,8 @@ export function validate(source: string, tokens: Token[], nodes: Node[]): Result
           return;
         }
         for (const arg of directive.args) {
-          const lexeme = getTokenLexeme(arg.tokens[0]);
-          const num = Number.parseInt(lexeme, 10);
-          if (num !== Number(lexeme) || Number.isNaN(num) || num < -32768 || num > 65535) {
+          const num = arg.tokens[0].value as number;
+          if (num !== Math.floor(num) || num < -32768 || num > 65535) {
             errors.push({ start: arg.tokens[0].start, end: arg.tokens[0].end, message: 'Invalid halfword value in .half directive' });
           }
           return;
@@ -71,9 +69,8 @@ export function validate(source: string, tokens: Token[], nodes: Node[]): Result
           return;
         }
         for (const arg of directive.args) {
-          const lexeme = getTokenLexeme(arg.tokens[0]);
-          const num = Number.parseInt(getTokenLexeme(arg.tokens[0]), 10);
-          if (num !== Number(lexeme) || Number.isNaN(num) || num < -2147483648 || num > 4294967295) {
+          const num = arg.tokens[0].value as number;
+          if (num !== Math.floor(num) || num < -2147483648 || num > 4294967295) {
             errors.push({ start: arg.tokens[0].start, end: arg.tokens[0].end, message: 'Invalid word value in .half directive' });
           }
           return;
@@ -94,9 +91,8 @@ export function validate(source: string, tokens: Token[], nodes: Node[]): Result
         if (directive.args.length > 1) {
           errors.push({ start: directive.start, end: directive.end, message: `Expected one numerice argument in .align directive` });
         }
-        const lexeme = getTokenLexeme(directive.args[0].tokens[0]);
-        const num = Number.parseInt(lexeme);
-        if (num !== Number(lexeme) || Number.isNaN(num) || num < 0 || num > 16) {
+        const num = directive.args[0].tokens[0].value as number;
+        if (num !== Math.floor(num) || num < 0 || num > 16) {
           errors.push({ start: directive.args[0].start, end: directive.args[0].end, message: 'Invalid alignment value in .align directive' });
         }
         return;
@@ -185,8 +181,8 @@ export function validate(source: string, tokens: Token[], nodes: Node[]): Result
       });
     } else {
       const imm = shiftAmount as InstructionImmediateNode;
-      const value = Number.parseInt(getTokenLexeme(imm.immediate), 10);
-      if (isNaN(value) || value < 0 || value > 31) {
+      const num = imm.immediate.value as number;
+      if (Math.floor(num) !== num || num < 0 || num > 31) {
         errors.push({
           start: shiftAmount.start,
           end: shiftAmount.end,
@@ -225,9 +221,8 @@ export function validate(source: string, tokens: Token[], nodes: Node[]): Result
         message: `Expected immediate value as argument 3 for ${getTokenLexeme(instruction.op)} instruction`
       });
     } else {
-      const immNode = imm as InstructionImmediateNode;
-      const value = Number.parseInt(getTokenLexeme(immNode.immediate), 10);
-      if (isNaN(value) || value < -32768 || value > 32767) {
+      const num = imm.immediate.value as number;
+      if (num !== Math.floor(num) || num < -32768 || num > 32767) {
         errors.push({
           start: imm.start,
           end: imm.end,
@@ -268,8 +263,8 @@ export function validate(source: string, tokens: Token[], nodes: Node[]): Result
     } else if (disp.type === NodeType.INSTRUCTION_DISPLACEMENT) {
 
       const dispNode = disp as InstructionDisplacementNode;
-      const value = Number.parseInt(getTokenLexeme(dispNode.disp), 10);
-      if (isNaN(value) || value < -32768 || value > 32767) {
+      const num = dispNode.disp.value as number;
+      if (num !== Math.floor(num) || num < -32768 || num > 32767) {
         errors.push({
           start: disp.start,
           end: disp.end,
@@ -434,10 +429,8 @@ export function validate(source: string, tokens: Token[], nodes: Node[]): Result
         message: `Expected immediate value as second argument for ${getTokenLexeme(instruction.op)} instruction`
       });
     } else {
-
-      const immNode = imm as InstructionImmediateNode;
-      const value = Number.parseInt(getTokenLexeme(immNode.immediate), 10);
-      if (isNaN(value) || value < -2147483648 || value > 2147483647) {
+      const num = imm.immediate.value as number;
+      if (Math.floor(num) !== num || num < -2147483648 || num > 2147483647) {
         errors.push({
           start: imm.start,
           end: imm.end,
