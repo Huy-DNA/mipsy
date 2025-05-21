@@ -16,14 +16,14 @@ function handleErrorsChange(newErrors: Error[]) {
 
 <template>
   <div class="min-h-[100vh]">
-    <header class="min-h-[5vh]">
-      <div class="flex items-center bg-blue-100">
+    <header class="p-2 min-h-[5vh] bg-blue-200">
+      <div class="flex items-center">
         <img alt="Mipsy logo" src="./assets/logo-no-bg.png" width="50" height="50" />
-        ipsy
+        <span class="text-2xl font-bold">ipsy</span>
       </div>
     </header>
-    <main class="h-[95vh]">
-      <splitpanes vertical class='default-theme w-full h-full p-2'>
+    <main class="h-[95vh] p-0 m-0">
+      <splitpanes vertical class='default-theme w-full h-full'>
         <pane size='70'>
           <splitpanes horizontal>
             <pane size='70'>

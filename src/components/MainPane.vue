@@ -8,5 +8,7 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <Editor @errors-change="(errors) => emit('errorsChange', errors)" />
+  <div class="bg-white h-full">
+    <Editor @errors-change="(errors) => emit('errorsChange', errors)" />
+  </div>
 </template>
